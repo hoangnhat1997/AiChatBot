@@ -1,0 +1,22 @@
+{
+  "name": "chatbot_scripts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google/generative-ai": "^0.13.0",
+    "@supabase/supabase-js": "^2.43.5",
+    "dotenv": "^16.4.5",
+    "front-matter": "^4.0.2",
+    "i": "^0.3.7",
+    "npm": "^10.8.1",
+    "openai": "^4.52.0"
+  }
+}

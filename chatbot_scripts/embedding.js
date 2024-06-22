@@ -15,3 +15,28 @@ export const generateEmbedding = async (input) => {
 
   return vector;
 };
+
+export const completion = async (prompt) => {
+  const chat = genAI
+    .getGenerativeModel({ model: "gemini-1.5-flash" })
+    .startChat({
+      // history: [
+      //   {
+      //     role: "user",
+      //     parts: [
+      //       {
+      //         text: prompt,
+      //       },
+      //     ],
+      //   },
+      // ],
+      generationConfig: {
+        maxOutputTokens: 100,
+      },
+    });
+
+  const result = await chat.sendMessage(prompt);
+
+  const text = result.response.text();
+  console.log(text);
+};

@@ -38,5 +38,5 @@ export const completion = async (prompt) => {
   const result = await chat.sendMessage(prompt);
 
   const text = result.response.text();
-  console.log(text);
+  return text;
 };

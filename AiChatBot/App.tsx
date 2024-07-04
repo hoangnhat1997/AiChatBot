@@ -1,13 +1,23 @@
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { Button, StyleSheet, Text, TextInput, View } from "react-native";
+import supabase from "./src/lib/supabase";
 
 export default function App() {
   const [query, setQuery] = useState("");
 
+  const runPrompt = async () => {
+    const { data, error } = await supabase.functions.invoke("prompt", {
+      body: { query },
+    });
+    if (error) {
+      console.error(error);
+    }
+    console.log(data);
+  };
+
   return (
     <View style={styles.container}>
-      <Text>AiChatBot after 1 years</Text>
       <TextInput
         placeholder="prompt"
         value={query}
@@ -16,11 +26,11 @@ export default function App() {
           padding: 10,
           borderColor: "gray",
           borderWidth: 1,
-          width: 200,
           margin: 10,
           borderRadius: 5,
         }}
       />
+      <Button title="Run" onPress={runPrompt} />
       <StatusBar style="auto" />
     </View>
   );

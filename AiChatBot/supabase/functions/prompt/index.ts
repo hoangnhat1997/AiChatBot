@@ -8,6 +8,7 @@ import "https://esm.sh/@supabase/functions-js/src/edge-runtime.d.ts"
 console.log("Hello from Functions!")
 
 import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
+import { createClient } from "@supabase/supabase-js";
 
 const genAI = new GoogleGenerativeAI(Deno.env.get('GOOGLE_API_KEY'));
 
@@ -23,6 +24,13 @@ export const generateEmbedding = async (input:string) => {
 };
 
 Deno.serve(async (req) => {
+
+  const supabaseKey = createClient(
+    Deno.env.get('SUPABASE_URL') ?? "",
+    Deno.env.get('SUPABASE_KEY') ?? "",
+    );
+
+
   const { query } = await req.json()
 
   const vector = await generateEmbedding(query);

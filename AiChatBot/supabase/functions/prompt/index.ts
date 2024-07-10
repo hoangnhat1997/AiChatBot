@@ -9,6 +9,17 @@ console.log("Hello from Functions!")
 
 import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
 import { createClient } from "@supabase/supabase-js";
+import fm from "npm:front-matter@4.0.2";
+
+export const parseExpoDocs = async (slug: string) => {
+  const url = `https://raw.githubusercontent.com/expo/expo/main/docs/pages/${slug}.mdx`;
+  const response = await fetch(url);
+  const content = await response.text();
+
+  const data = fm(content);
+  return data;
+};
+
 
 const genAI = new GoogleGenerativeAI(Deno.env.get('GOOGLE_API_KEY'));
 
@@ -22,6 +33,46 @@ export const generateEmbedding = async (input:string) => {
 
   return vector;
 };
+
+const buildFullPrompt = (query: string, docsContext: string) => {
+  const prompt_boilerplate =
+    "Answer the question posed in the user query section using the provided context";
+  const user_query_boilerplate = "USER QUERY: ";
+  const document_context_boilerplate = "CONTEXT: ";
+  const final_answer_boilerplate = "Final Answer: ";
+
+  const filled_prompt_template = `
+    ${prompt_boilerplate}
+    ${user_query_boilerplate} ${query}
+    ${document_context_boilerplate} ${docsContext} 
+    ${final_answer_boilerplate}`;
+  return filled_prompt_template;
+};
+
+export const completion = async (prompt: string) => {
+  const chat = genAI
+    .getGenerativeModel({ model: "gemini-1.5-flash" })
+    .startChat({
+      // history: [
+      //   {
+      //     role: "user",
+      //     parts: [
+      //       {
+      //         text: prompt,
+      //       },
+      //     ],
+      //   },
+      // ],
+      generationConfig: {
+        maxOutputTokens: 100,
+      },
+    });
+      const result = await chat.sendMessage(prompt);
+
+  const text = result.response.text();
+  return text;
+};
+
 
 Deno.serve(async (req) => {
 
@@ -41,12 +92,18 @@ Deno.serve(async (req) => {
     match_count: 2,
   });
 
+  const docs = await Promise.all(similarDocs.map((doc: any) => parseExpoDocs(doc.id)));
+  const docBoddies = docs.map((doc) => doc.body);
+  const content = "".concat(...docBoddies);
+  const filledPrompt = buildFullPrompt(query, content);
+  const answer = await completion(filledPrompt);
+  console.log(answer);
+
 
   console.log(similarDocs);
 
   const data = {
-    message: `Hello ${query}!`,
-    vectorDimentions: vector.length,
+    answer
   }
 
 

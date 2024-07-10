@@ -25,7 +25,7 @@ export const generateEmbedding = async (input:string) => {
 
 Deno.serve(async (req) => {
 
-  const supabaseKey = createClient(
+  const supabase = createClient(
     Deno.env.get('SUPABASE_URL') ?? "",
     Deno.env.get('SUPABASE_KEY') ?? "",
     );
@@ -34,7 +34,15 @@ Deno.serve(async (req) => {
   const { query } = await req.json()
 
   const vector = await generateEmbedding(query);
-  console.log(vector);
+
+  const { data: similarDocs, error } = await supabase.rpc("match_docs", {
+    query_embedding: vector,
+    match_threshold: 0.3,
+    match_count: 2,
+  });
+
+
+  console.log(similarDocs);
 
   const data = {
     message: `Hello ${query}!`,
